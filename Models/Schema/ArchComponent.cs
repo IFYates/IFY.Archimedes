@@ -24,5 +24,5 @@ public record ArchComponent(
     /// <summary>
     /// Direct links from this component to other components (by ID).
     /// </summary>
-    public Dictionary<string, Link> Links { get; } = [];
+    public List<Link> Links { get; } = [];
 }

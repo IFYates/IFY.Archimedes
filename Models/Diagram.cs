@@ -41,4 +41,22 @@ public record Diagram
         Depth = depth;
         ParentId = root is null ? null : root.Parent?.Id is null ? "root-d" : $"d-{root?.Parent?.Id.ToLower()}";
     }
+
+    public Dictionary<string, DiagramNode> GetAllNodes()
+    {
+        var all = new Dictionary<string, DiagramNode>();
+        map(Nodes.Values);
+        return all;
+        void map(IEnumerable<DiagramNode> nodes)
+        {
+            foreach (var node in nodes)
+            {
+                if (!all.ContainsKey(node.Id))
+                {
+                    all[node.Id] = node;
+                    map(node.ChildNodes.Values);
+                }
+            }
+        }
+    }
 }

@@ -32,7 +32,7 @@ public static class DiagramBuilder // TODO: options?
         diagrams[diagram.Id] = diagram;
 
         var nodes = new Dictionary<string, ArchComponent>();
-        var links = new List<NodeLink>();
+        var links = new List<Link>();
 
         if (root != null)
         {
@@ -54,7 +54,7 @@ public static class DiagramBuilder // TODO: options?
             foreach (var link in item.Links)
             {
                 var source = findVisibleItem(item.Id);
-                var target = findVisibleItem(link.Key);
+                var target = findVisibleItem(link.TargetId);
 
                 if (coreNodes.Contains(source.Id) || coreNodes.Contains(target.Id))
                 {
@@ -84,24 +84,11 @@ public static class DiagramBuilder // TODO: options?
             var linkId = $"{source.Id}:{target.Id}";
             if (!diagram.Links.TryGetValue(linkId, out var nodeLink))
             {
-                diagram.Links[linkId] = new NodeLink(source.Id, target.Id, link.Link);
-            }
-            else // Link already exists
-            {
-                // TODO: record all actual sources/targets
-
-                if (nodeLink.Type != link.Type)
-                {
-                    // Clashing types; set to default
-                    nodeLink = nodeLink with { Type = LinkType.Default };
-                }
-                if (nodeLink.Text != link.Text)
-                {
-                    // Can't show text on shared links
-                    nodeLink = nodeLink with { Text = null };
-                }
+                nodeLink = new NodeLink(source.Id, target.Id);
                 diagram.Links[linkId] = nodeLink;
             }
+
+            nodeLink.Links.Add(link);
         }
 
         // Recursively build child diagrams
@@ -146,7 +133,7 @@ public static class DiagramBuilder // TODO: options?
         }
         void mapLinks(ArchComponent component)
         {
-            links.AddRange(component.Links.Select(l => new NodeLink(component.Id, l.Key, l.Value)));
+            links.AddRange(component.Links);
             foreach (var child in component.Children.Values)
             {
                 mapLinks(child);

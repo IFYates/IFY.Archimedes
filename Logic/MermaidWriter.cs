@@ -6,7 +6,7 @@ namespace IFY.Archimedes.Logic;
 
 public static class MermaidWriter
 {
-    public static string WriteMermaid(Diagram diagram)
+    public static string WriteMermaid(Diagram diagram, Dictionary<string, ArchComponent> all)
     {
         var sb = new StringBuilder();
         sb.AppendLine("graph TD");
@@ -21,15 +21,38 @@ public static class MermaidWriter
         sb.AppendLine();
 
         // Write links
+        var nodes = diagram.GetAllNodes();
         foreach (var link in diagram.Links.Values)
         {
             var arrow = link.Type.GetEnumMemberValue();
-            if (link.Text?.Length > 0)
+            List<string?> lines = [link.Text?.HtmlEncode()];
+
+            // If showing one true end node and inherited other, link to true node
+            foreach (var info in link.Links)
             {
-                arrow += $"|\"{link.Text}\"|";
+                if (nodes.ContainsKey(info.SourceId) && !nodes.ContainsKey(info.TargetId))
+                {
+                    var target = all[info.TargetId];
+                    if (target.Parent != null)
+                    {
+                        lines.Add($"<small>To <a href='#d-{target.Parent.Id.ToLower()}'>{target.Title.HtmlEncode()}</a></small>");
+                    }
+                }
+                else if (!nodes.ContainsKey(info.SourceId) && nodes.ContainsKey(info.TargetId))
+                {
+                    var source = all[info.SourceId];
+                    if (source.Parent != null)
+                    {
+                        lines.Add($"<small>From <a href='#d-{source.Parent.Id.ToLower()}'>{source.Title.HtmlEncode()}</a></small>");
+                    }
+                }
             }
 
-            // TODO: if showing one true end node and inherited other, link to true node
+            var text = string.Join("<br>", lines.Where(l => !string.IsNullOrWhiteSpace(l)).Distinct());
+            if (text?.Length > 0)
+            {
+                arrow += $"|\"{text}\"|";
+            }
 
             sb.AppendLine($"    {link.SourceId} {arrow} {link.TargetId}");
         }

@@ -69,7 +69,7 @@ var sb = new System.Text.StringBuilder();
 sb.AppendLine("# Architecture Diagrams");
 foreach (var diagram in diagrams.Values)
 {
-    var mermaid = MermaidWriter.WriteMermaid(diagram);
+    var mermaid = MermaidWriter.WriteMermaid(diagram, validator.Result);
     sb.AppendLine();
     sb.AppendLine($"<span id=\"{diagram.Id}\"></span>");
     sb.AppendLine($"## {diagram.Title}");
