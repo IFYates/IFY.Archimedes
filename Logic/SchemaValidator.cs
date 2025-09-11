@@ -61,7 +61,7 @@ public partial class SchemaValidator
                 {
                     throw new InvalidDataException($"Component '{comp.Id}' has a link to undefined target '{link.Key}'.");
                 }
-                comp.Links[link.Key] = new(linkType, linkText);
+                comp.Links.Add(new(comp.Id, link.Key, linkType, linkText));
             }
         }
 
