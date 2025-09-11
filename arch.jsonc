@@ -1,0 +1,16 @@
+{
+    "Item1": {
+        "children": {
+            "Item1A": {
+                "links": {
+                    "Item2": "dots"
+                }
+            }
+        }
+    },
+    "Item2": {
+        "links": {
+            "Item1": "dots"
+        }
+    }
+}
