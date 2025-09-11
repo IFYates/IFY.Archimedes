@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace IFY.Archimedes.Logic;
 
-public class SchemaValidator
+public partial class SchemaValidator
 {
     public List<string> Errors { get; } = [];
 
@@ -70,6 +70,12 @@ public class SchemaValidator
 
         ArchComponent parseComponents(string key, JsonEntry item, ArchComponent? parent = null)
         {
+            // Validate key format: ^\w+$
+            if (!ComponentIdFormat().IsMatch(key))
+            {
+                throw new InvalidDataException($"Component key '{key}' is invalid. Keys must be non-empty and contain only letters, numbers, and underscores.");
+            }
+
             if (all.ContainsKey(key))
             {
                 throw new InvalidDataException($"Component '{key}' is defined multiple times.");
@@ -92,4 +98,7 @@ public class SchemaValidator
             return comp;
         }
     }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"^\w+$")]
+    private static partial System.Text.RegularExpressions.Regex ComponentIdFormat();
 }

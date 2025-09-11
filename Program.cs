@@ -7,12 +7,14 @@ using YamlDotNet.Serialization;
 // TODO: options
 // - individual mermaid files
 // - single MD file
+// - interactive HTML
+// - single complete mermaid
 // - remove 'back' links
 // - remove item links
 // - add graph title
 
 // Read input
-var file = "arch.jsonc";
+var file = "../../../arch.jsonc";
 var input = File.ReadAllText(file);
 
 // Parse input
