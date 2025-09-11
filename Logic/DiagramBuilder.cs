@@ -1,0 +1,148 @@
+﻿using IFY.Archimedes.Models;
+using IFY.Archimedes.Models.Schema;
+
+namespace IFY.Archimedes.Logic;
+
+/// <summary>
+/// Resolves diagrams from schema components.
+/// </summary>
+public static class DiagramBuilder // TODO: options?
+{
+    public static Dictionary<string, Diagram> BuildDiagrams(Dictionary<string, ArchComponent> components)
+    {
+        var diagrams = new Dictionary<string, Diagram>();
+        buildDiagram(diagrams, null, 0, components);
+        return diagrams;
+    }
+
+    // Root items are shown in detail with all links in and out
+
+    private static void buildDiagram(Dictionary<string, Diagram> diagrams, ArchComponent? root, int depth, Dictionary<string, ArchComponent> components)
+    {
+        // Create diagram for the current root (if not already created)
+        var diagram = new Diagram(root, depth);
+        if (diagrams.TryGetValue(diagram.Id, out var value))
+        {
+            if (value.Depth > depth)
+            {
+                value.Depth = depth;
+            }
+            return;
+        }
+        diagrams[diagram.Id] = diagram;
+
+        var nodes = new Dictionary<string, ArchComponent>();
+        var links = new List<NodeLink>();
+
+        if (root != null)
+        {
+            addNode(null, root, true);
+        }
+        else
+        {
+            // Add all top-level items
+            foreach (var item in components.Values.Where(c => c.Parent is null))
+            {
+                addNode(null, item, false);
+            }
+        }
+
+        // Find all other links to items included in the diagram
+        var coreNodes = nodes.Keys.ToHashSet();
+        foreach (var item in components.Values.Where(i => !nodes.ContainsKey(i.Id)))
+        {
+            foreach (var link in item.Links)
+            {
+                var source = findVisibleItem(item.Id);
+                var target = findVisibleItem(link.Key);
+
+                if (coreNodes.Contains(source.Id) && !coreNodes.Contains(target.Id))
+                {
+                    addNode(null, target, false);
+                }
+                else if (!coreNodes.Contains(source.Id) && coreNodes.Contains(target.Id))
+                {
+                    addNode(null, source, false);
+                }
+            }
+        }
+
+        // Add links must be visible on the diagram
+        foreach (var link in links.ToArray())
+        {
+            var source = findVisibleItem(link.SourceId);
+            var target = findVisibleItem(link.TargetId);
+
+            var linkId = $"{source.Id}:{target.Id}";
+            if (!diagram.Links.TryGetValue(linkId, out var nodeLink))
+            {
+                diagram.Links[linkId] = new NodeLink(source.Id, target.Id, link.Link);
+            }
+            else // Link already exists
+            {
+                // TODO: record all actual sources/targets
+
+                if (nodeLink.Type != link.Type)
+                {
+                    // Clashing types; set to default
+                    nodeLink = nodeLink with { Type = LinkType.Default };
+                }
+                if (nodeLink.Text != link.Text)
+                {
+                    // Can't show text on shared links
+                    nodeLink = nodeLink with { Text = null };
+                }
+                diagram.Links[linkId] = nodeLink;
+            }
+        }
+
+        // Recursively build child diagrams
+        foreach (var item in nodes.Values.Where(n => n.Children.Count > 0 && !n.Expand))
+        {
+            buildDiagram(diagrams, item, depth + 1, components);
+        }
+
+        void addNode(DiagramNode? parent, ArchComponent component, bool expand)
+        {
+            // Register node
+            var node = new DiagramNode(component);
+            if (parent is null)
+            {
+                diagram.Nodes[node.Id] = node;
+            }
+            else
+            {
+                parent.ChildNodes[node.Id] = node;
+            }
+            nodes[component.Id] = component;
+
+            mapLinks(component);
+
+            // Expand children
+            if (expand || component.Expand)
+            {
+                foreach (var child in component.Children.Values)
+                {
+                    addNode(node, child, false);
+                }
+            }
+        }
+        ArchComponent findVisibleItem(string id)
+        {
+            var comp = components[id];
+            while (comp.Parent != null && !nodes.ContainsKey(comp.Id))
+            {
+                comp = comp.Parent;
+            }
+            return comp;
+        }
+        void mapLinks(ArchComponent component)
+        {
+            links.AddRange(component.Links.Select(l => new NodeLink(component.Id, l.Key, l.Value)));
+            foreach (var child in component.Children.Values)
+            {
+                mapLinks(child);
+            }
+        }
+    }
+}
