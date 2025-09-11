@@ -47,22 +47,25 @@ public static class DiagramBuilder // TODO: options?
             }
         }
 
-        // Find all other links to items included in the diagram
+        // Find all other links to core diagram nodes
         var coreNodes = nodes.Keys.ToHashSet();
-        foreach (var item in components.Values.Where(i => !nodes.ContainsKey(i.Id)))
+        foreach (var item in components.Values)
         {
             foreach (var link in item.Links)
             {
                 var source = findVisibleItem(item.Id);
                 var target = findVisibleItem(link.Key);
 
-                if (coreNodes.Contains(source.Id) && !coreNodes.Contains(target.Id))
+                if (coreNodes.Contains(source.Id) || coreNodes.Contains(target.Id))
                 {
-                    addNode(null, target, false);
-                }
-                else if (!coreNodes.Contains(source.Id) && coreNodes.Contains(target.Id))
-                {
-                    addNode(null, source, false);
+                    if (!nodes.ContainsKey(source.Id))
+                    {
+                        addNode(null, source, false);
+                    }
+                    if (!nodes.ContainsKey(target.Id))
+                    {
+                        addNode(null, target, false);
+                    }
                 }
             }
         }
@@ -72,6 +75,11 @@ public static class DiagramBuilder // TODO: options?
         {
             var source = findVisibleItem(link.SourceId);
             var target = findVisibleItem(link.TargetId);
+
+            if (!coreNodes.Contains(source.Id) && !coreNodes.Contains(target.Id))
+            {
+                continue;
+            }
 
             var linkId = $"{source.Id}:{target.Id}";
             if (!diagram.Links.TryGetValue(linkId, out var nodeLink))
