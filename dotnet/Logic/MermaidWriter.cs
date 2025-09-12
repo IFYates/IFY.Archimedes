@@ -9,20 +9,19 @@ public static class MermaidWriter
     public static string WriteMermaid(Diagram diagram, Dictionary<string, ArchComponent> all)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("graph TD");
+        sb.AppendLine("graph " + Options.Direction);
         sb.AppendLine($"%% {diagram.Title}");
-        sb.AppendLine();
 
         if (diagram.ParentId != null)
         {
-            sb.AppendLine($"B{DateTime.Now.Ticks}([\"<small><a href='#{diagram.ParentId}'>Back</a></small>\"])");
+            sb.AppendLine($"    B{DateTime.Now.Ticks}([\"<small><a href='#{diagram.ParentId}'>Back</a></small>\"])");
             sb.AppendLine();
         }
 
         // Write nodes
         foreach (var node in diagram.Nodes.Values)
         {
-            writeNode(sb, node, 1);
+            writeNode(sb, node, 1, diagram);
         }
         sb.AppendLine();
 
@@ -41,7 +40,7 @@ public static class MermaidWriter
                     var target = all[info.TargetId];
                     if (target.Parent != null)
                     {
-                        lines.Add($"<small>To <a href='#d-{target.Parent.Id.ToLower()}'>{target.Title.HtmlEncode()}</a></small>");
+                        lines.Add($"<small><em>To <a href='#d-{target.Parent.Id.ToLower()}'>{target.Title.HtmlEncode()}</a></em></small>");
                     }
                 }
                 else if (!nodes.ContainsKey(info.SourceId) && nodes.ContainsKey(info.TargetId))
@@ -49,7 +48,7 @@ public static class MermaidWriter
                     var source = all[info.SourceId];
                     if (source.Parent != null)
                     {
-                        lines.Add($"<small>From <a href='#d-{source.Parent.Id.ToLower()}'>{source.Title.HtmlEncode()}</a></small>");
+                        lines.Add($"<small><em>From <a href='#d-{source.Parent.Id.ToLower()}'>{source.Title.HtmlEncode()}</a></em></small>");
                     }
                 }
             }
@@ -63,19 +62,25 @@ public static class MermaidWriter
             sb.AppendLine($"    {link.SourceId} {arrow} {link.TargetId}");
         }
 
-        return sb.ToString();
+        return sb.ToString().TrimEnd();
     }
 
-    private static void writeNode(StringBuilder sb, DiagramNode node, int depth)
+    private static void writeNode(StringBuilder sb, DiagramNode node, int depth, Diagram diagram)
     {
         var indent = new string(' ', depth * 4);
 
         var isSubgraph = node.ChildNodes.Count > 0;
         var childCount = node.Component.Children.Count;
 
-        var nodeLabel = !isSubgraph && childCount > 0
-            ? $"<a href='#d-{node.Id.ToLower()}' title='Expand node'>{node.Title.HtmlEncode()}</a>"
-            : node.Title.HtmlEncode();
+        var nodeLabel = node.Title.HtmlEncode();
+        if (!isSubgraph && childCount > 0)
+        {
+            nodeLabel = $"<a href='#d-{node.Id.ToLower()}' title='Expand node'>{nodeLabel}</a>";
+        }
+        if (node.Id == diagram.RootComponent?.Id)
+        {
+            nodeLabel = $"<big><strong>{nodeLabel}</strong></big>";
+        }
 
         if (isSubgraph)
         {
@@ -91,7 +96,7 @@ public static class MermaidWriter
             sb.AppendLine($"{indent}subgraph {node.Id}[\"{nodeLabel}\"]");
             foreach (var child in node.ChildNodes.Values)
             {
-                writeNode(sb, child, depth + 1);
+                writeNode(sb, child, depth + 1, diagram);
             }
             sb.AppendLine($"{indent}end");
         }
@@ -99,7 +104,7 @@ public static class MermaidWriter
         {
             if (node.Component.Detail != null)
             {
-                nodeLabel += $"<br>{node.Component.Detail.HtmlEncode()}";
+                nodeLabel += $"<br><em>{node.Component.Detail.HtmlEncode()}</em>";
             }
             if (node.Component.Doc != null)
             {

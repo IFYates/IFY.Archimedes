@@ -76,6 +76,11 @@ public static class DiagramBuilder // TODO: options?
             var source = findVisibleItem(link.SourceId);
             var target = findVisibleItem(link.TargetId);
 
+            if (source.Id == target.Id
+                && link.SourceId != link.TargetId)
+            {
+                continue; // No implicit self-links
+            }
             if (!coreNodes.Contains(source.Id) && !coreNodes.Contains(target.Id))
             {
                 continue;

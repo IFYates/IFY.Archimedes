@@ -15,6 +15,10 @@ public record Diagram
     /// The ID of the parent diagram, if any.
     /// </summary>
     public string? ParentId { get; }
+    /// <summary>
+    /// The root component for the diagram, if any.
+    /// </summary>
+    public ArchComponent? RootComponent { get; }
 
     /// <summary>
     /// The unique ID of the diagram.
@@ -38,6 +42,7 @@ public record Diagram
     {
         Id = root is null ? "root-d" : $"d-{root.Id.ToLower()}";
         Title = root?.Title ?? "All Components";
+        RootComponent = root;
         Depth = depth;
         ParentId = root is null ? null : root.Parent?.Id is null ? "root-d" : $"d-{root?.Parent?.Id.ToLower()}";
     }
