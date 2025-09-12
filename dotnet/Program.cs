@@ -88,14 +88,17 @@ var diagrams = DiagramBuilder.BuildDiagrams(validator.Result);
 //}
 
 // Output single MD file
+// TODO: To writer
 var sb = new System.Text.StringBuilder();
 sb.AppendLine("# Architecture Diagrams");
 foreach (var diagram in diagrams.Values)
 {
+    // TODO: options
     var mermaid = MermaidWriter.WriteMermaid(diagram, validator.Result);
     sb.AppendLine();
     sb.AppendLine($"<span id=\"{diagram.Id}\"></span>");
     sb.AppendLine($"## {diagram.Title}");
+    // TODO: description, documents, link to parent
     sb.AppendLine();
     sb.AppendLine(":::mermaid");
     sb.AppendLine(mermaid);

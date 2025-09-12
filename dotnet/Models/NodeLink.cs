@@ -2,6 +2,8 @@
 
 namespace IFY.Archimedes.Models;
 
+// TODO: support conflation in both directions
+// TODO: support styling (generate ID)
 public record NodeLink(string SourceId, string TargetId)
 {
     public List<Link> Links { get; } = [];

@@ -3,4 +3,4 @@
 /// <summary>
 /// A link between two <see cref="ArchComponent"/>s.
 /// </summary>
-public record Link(string SourceId, string TargetId, LinkType Type, string? Text);
+public record Link(string SourceId, string TargetId, LinkType Type, string? Text, bool Reverse);

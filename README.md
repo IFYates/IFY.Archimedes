@@ -49,20 +49,21 @@ ComponentID:
   children: # (optional) Dictionary of child components
     ChildComponentID: {} # Same structure as parent
   links: # (optional) Dictionary of links to other components as string or object
-    TargetComponentID: # Style of the link
+    TargetComponentID: # Target of the link with just a style
       - default # Can be omitted using '{}'
       - dots
       - line # No arrow
       - thick
-      - invisible
-    TargetComponentID2:
-      type:
-        - default # Can be omitted using '{}'
+      - invisible # Nothing visible
+    TargetComponentID2: # Target of the link with full options
+      type: # (string, optional) Style of the link
+        - default
         - dots
         - line # No arrow
         - thick
-        - invisible
-      text: Text for the link
+        - invisible # Nothing visible
+      text: (string, optional) Text for the link
+      reverse: (boolean, default: false) Whether the link is reversed (target to source)
 ```
 
 # Example
