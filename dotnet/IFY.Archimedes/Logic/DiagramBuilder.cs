@@ -1,5 +1,6 @@
 ﻿using IFY.Archimedes.Models;
 using IFY.Archimedes.Models.Schema;
+using System.Formats.Tar;
 
 namespace IFY.Archimedes.Logic;
 
@@ -31,12 +32,22 @@ public static class DiagramBuilder // TODO: options?
         }
         diagrams[diagram.Id] = diagram;
 
-        var nodes = new Dictionary<string, ArchComponent>();
+        var nodes = new Dictionary<string, DiagramNode>();
         var links = new List<Link>();
 
         if (root != null)
         {
-            addNode(null, root, true);
+            var node = addNode(null, root, true);
+
+            // Add parent nodes
+            while (node.Component.Parent != null)
+            {
+                var parent = addNode(null, node.Component.Parent, false);
+                parent.ChildNodes[node.Id] = node;
+                diagram.Nodes.Remove(node.Id);
+                diagram.Nodes[parent.Id] = parent;
+                node = parent;
+            }
         }
         else
         {
@@ -53,18 +64,18 @@ public static class DiagramBuilder // TODO: options?
         {
             foreach (var link in item.Links)
             {
-                var source = findVisibleItem(item.Id);
-                var target = findVisibleItem(link.TargetId);
+                var source = findVisibleItem(item.Id, out var sourceParent);
+                var target = findVisibleItem(link.TargetId, out var targetParent);
 
                 if (coreNodes.Contains(source.Id) || coreNodes.Contains(target.Id))
                 {
                     if (!nodes.ContainsKey(source.Id))
                     {
-                        addNode(null, source, false);
+                        addNode(sourceParent, source, false);
                     }
                     if (!nodes.ContainsKey(target.Id))
                     {
-                        addNode(null, target, false);
+                        addNode(targetParent, target, false);
                     }
                 }
             }
@@ -79,8 +90,8 @@ public static class DiagramBuilder // TODO: options?
                 link = link with { SourceId = link.TargetId, TargetId = link.SourceId, Reverse = false };
             }
 
-            var source = findVisibleItem(link.SourceId);
-            var target = findVisibleItem(link.TargetId);
+            var source = findVisibleItem(link.SourceId, out _);
+            var target = findVisibleItem(link.TargetId, out _);
 
             if (source.Id == target.Id
                 && link.SourceId != link.TargetId)
@@ -103,12 +114,12 @@ public static class DiagramBuilder // TODO: options?
         }
 
         // Recursively build child diagrams
-        foreach (var item in nodes.Values.Where(n => n.Children.Count > 0 && !n.Expand))
+        foreach (var item in nodes.Values.Select(n => n.Component).Where(n => n.Children.Count > 0 && !n.Expand))
         {
             buildDiagram(diagrams, item, depth + 1, components);
         }
 
-        void addNode(DiagramNode? parent, ArchComponent component, bool expand)
+        DiagramNode addNode(DiagramNode? parent, ArchComponent component, bool expand)
         {
             // Register node
             var node = new DiagramNode(component);
@@ -120,7 +131,7 @@ public static class DiagramBuilder // TODO: options?
             {
                 parent.ChildNodes[node.Id] = node;
             }
-            nodes[component.Id] = component;
+            nodes[node.Id] = node;
 
             mapLinks(component);
 
@@ -132,12 +143,23 @@ public static class DiagramBuilder // TODO: options?
                     addNode(node, child, false);
                 }
             }
+
+            return node;
         }
-        ArchComponent findVisibleItem(string id)
+        ArchComponent findVisibleItem(string id, out DiagramNode? parent)
         {
+            parent = null;
             var comp = components[id];
-            while (comp.Parent != null && !nodes.ContainsKey(comp.Id))
+            while (comp.Parent != null
+                && !nodes.ContainsKey(comp.Id))
             {
+                if (nodes.TryGetValue(comp.Parent.Id, out var p)
+                    && p.ChildNodes.Count > 0)
+                {
+                    parent = p;
+                    break;
+                }
+
                 comp = comp.Parent;
             }
             return comp;
