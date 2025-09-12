@@ -1,4 +1,10 @@
-﻿# Archimedes
+﻿<div align="center">
+
+![Archimedes](archimedes-256.png)
+
+</div>
+
+# Archimedes
 A generator for layered architectural diagrams.
 
 # Overview
