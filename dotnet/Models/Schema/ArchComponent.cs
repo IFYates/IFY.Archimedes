@@ -14,6 +14,7 @@ public record ArchComponent(
 {
     public string? Detail => Source.Detail;
     public string? Doc => Source.Doc;
+    public string? Style => Source.Style;
     public bool Expand => Source.Expand;
 
     /// <summary>
