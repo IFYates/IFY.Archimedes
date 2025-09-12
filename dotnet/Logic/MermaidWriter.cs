@@ -13,6 +13,12 @@ public static class MermaidWriter
         sb.AppendLine($"%% {diagram.Title}");
         sb.AppendLine();
 
+        if (diagram.ParentId != null)
+        {
+            sb.AppendLine($"B{DateTime.Now.Ticks}([\"<small><a href='#{diagram.ParentId}'>Back</a></small>\"])");
+            sb.AppendLine();
+        }
+
         // Write nodes
         foreach (var node in diagram.Nodes.Values)
         {
@@ -55,12 +61,6 @@ public static class MermaidWriter
             }
 
             sb.AppendLine($"    {link.SourceId} {arrow} {link.TargetId}");
-        }
-
-        if (diagram.ParentId != null)
-        {
-            sb.AppendLine();
-            sb.AppendLine($"B{DateTime.Now.Ticks}([\"<small><a href='#{diagram.ParentId}'>Back</a></small>\"])");
         }
 
         return sb.ToString();
