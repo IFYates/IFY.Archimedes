@@ -13,14 +13,22 @@ using YamlDotNet.Serialization;
 // - remove 'back' links
 // - remove item links
 // - add graph title
+// - graph direction
 
 // Setup
 string file = null!;
 var consoleOptions = new ConsoleOptions(
-    new PositionalArg(0, "file", v => file = v, true, "Input file (JSON or YAML).")
+    new PositionalArg(0, "file", v => file = v, true, "Input file (JSON or YAML)."),
+    new NamedArg("dir", v => Options.Direction = v, false, "Graph direction (TD, LR). Default: LR")
 );
 if (!consoleOptions.TryParse(args))
 {
+    return;
+}
+
+if (Options.Direction is not "TD" and not "LR")
+{
+    Console.Error.WriteLine($"Invalid direction: {Options.Direction}. Must be TD or LR.");
     return;
 }
 
@@ -94,3 +102,8 @@ foreach (var diagram in diagrams.Values)
     sb.AppendLine(":::");
 }
 File.WriteAllText($@"F:\Dev\IFY.Archimedes\output.md", sb.ToString());
+
+static class Options
+{
+    public static string Direction { get; set; } = "LR";
+}
