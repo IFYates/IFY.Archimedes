@@ -109,7 +109,7 @@ Using command `IFY.Archimedes.exe -file example.yaml`, you would get the followi
 <span id="root-d"></span>
 > ## All Components
 > 
-> :::mermaid
+> ```mermaid
 > graph LR
 > %% All Components
 >     File[/"Input file<br><em>JSON or YAML</em>"\]
@@ -121,12 +121,12 @@ Using command `IFY.Archimedes.exe -file example.yaml`, you would get the followi
 >     File -->|"Via args<br><small><em>To <a href='#d-archimedes'>Parser</a></em></small>"| Archimedes
 >     Archimedes -.->|"<small><em>From <a href='#d-archimedes'>Writer</a></em></small>"| Output
 >     Output -.-> Next
-> :::
+> ```
 > 
 > <span id="d-archimedes"></span>
 > ## Archimedes
 > 
-> :::mermaid
+> ```mermaid
 > graph LR
 > %% Archimedes
 >     B638932708823095386(["<small><a href='#root-d'>Back</a></small>"])
@@ -145,4 +145,4 @@ Using command `IFY.Archimedes.exe -file example.yaml`, you would get the followi
 >     Structure --> Writer
 >     Writer -.-> Output
 >     File -->|"Via args"| Parser
-> :::
+> ```
