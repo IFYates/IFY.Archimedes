@@ -10,9 +10,13 @@ public record JsonEntry(
     string? Title,
     string? Detail,
     string? Doc,
+    string? Style,
     bool Expand
 )
 {
+    /// <summary>
+    /// The child components of this entry.
+    /// </summary>
     public Dictionary<string, JsonEntry> Children { get; init; } = [];
     /// <summary>
     /// Links to other components (by ID).

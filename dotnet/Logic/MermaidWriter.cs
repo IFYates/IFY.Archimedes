@@ -128,5 +128,10 @@ public static class MermaidWriter
             var shape = nodeType.GetEnumMemberValue();
             sb.AppendLine($"{indent}{node.Id}{string.Format(shape, nodeLabel)}");
         }
+
+        if (node.Component.Style != null)
+        {
+            sb.AppendLine($"{indent}style {node.Id} {node.Component.Style}");
+        }
     }
 }
