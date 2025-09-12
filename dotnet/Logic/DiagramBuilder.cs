@@ -16,7 +16,7 @@ public static class DiagramBuilder // TODO: options?
     }
 
     // Root items are shown in detail with all links in and out
-
+    // TODO: All root item parents should be shown
     private static void buildDiagram(Dictionary<string, Diagram> diagrams, ArchComponent? root, int depth, Dictionary<string, ArchComponent> components)
     {
         // Create diagram for the current root (if not already created)
@@ -71,8 +71,14 @@ public static class DiagramBuilder // TODO: options?
         }
 
         // Add links must be visible on the diagram
-        foreach (var link in links.ToArray())
+        foreach (var l in links)
         {
+            var link = l;
+            if (link.Reverse)
+            {
+                link = link with { SourceId = link.TargetId, TargetId = link.SourceId, Reverse = false };
+            }
+
             var source = findVisibleItem(link.SourceId);
             var target = findVisibleItem(link.TargetId);
 

@@ -28,9 +28,15 @@ public partial class SchemaValidator
         {
             foreach (var link in comp.Source.Links)
             {
+                if (!all.ContainsKey(link.Key))
+                {
+                    throw new InvalidDataException($"Component '{comp.Id}' has a link to undefined target '{link.Key}'.");
+                }
+
+                var newLink = new Link(comp.Id, link.Key, LinkType.Default, null, false);
+
                 // Can be string or JsonLink
                 string? typeValue = null;
-                string? linkText = null;
                 if (link.Value.ValueKind == JsonValueKind.String)
                 {
                     typeValue = link.Value.GetString();
@@ -45,7 +51,11 @@ public partial class SchemaValidator
                     else
                     {
                         typeValue = obj.Type;
-                        linkText = obj.Text;
+                        newLink = newLink with
+                        {
+                            Text = obj.Text,
+                            Reverse = obj.Reverse
+                        };
                     }
                 }
                 else
@@ -57,11 +67,7 @@ public partial class SchemaValidator
                 {
                     throw new InvalidDataException($"Component '{comp.Id}' has an invalid link type '{link.Value}' for target '{link.Key}'.");
                 }
-                if (!all.ContainsKey(link.Key))
-                {
-                    throw new InvalidDataException($"Component '{comp.Id}' has a link to undefined target '{link.Key}'.");
-                }
-                comp.Links.Add(new(comp.Id, link.Key, linkType, linkText));
+                comp.Links.Add(newLink with { Type = linkType });
             }
         }
 
