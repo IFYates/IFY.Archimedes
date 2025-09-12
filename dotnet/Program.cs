@@ -1,4 +1,5 @@
 ﻿using IFY.Archimedes;
+using IFY.Archimedes.ConsoleArgs;
 using IFY.Archimedes.Logic;
 using IFY.Archimedes.Models.Schema;
 using System.Text.Json;
@@ -13,8 +14,22 @@ using YamlDotNet.Serialization;
 // - remove item links
 // - add graph title
 
+// Setup
+string file = null!;
+var consoleOptions = new ConsoleOptions(
+    new PositionalArg(0, "file", v => file = v, true, "Input file (JSON or YAML).")
+);
+if (!consoleOptions.TryParse(args))
+{
+    return;
+}
+
 // Read input
-var file = "../../../arch.jsonc";
+if (!File.Exists(file))
+{
+    Console.Error.WriteLine($"File not found: {file}");
+    return;
+}
 var input = File.ReadAllText(file);
 
 // Parse input

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "IFY.Archimedes": {
+      "commandName": "Project",
+      "commandLineArgs": "-file \"../../../../arch.jsonc\""
+    }
+  }
+}
