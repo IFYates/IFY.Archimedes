@@ -1,34 +1,34 @@
 ﻿using IFY.Archimedes;
-using IFY.Archimedes.ConsoleArgs;
 using IFY.Archimedes.Logic;
 using IFY.Archimedes.Models.Schema;
 using System.Text.Json;
 using YamlDotNet.Serialization;
 
 // TODO: options
-// - individual mermaid files
-// - single MD file
-// - interactive HTML
-// - single complete mermaid
-// - remove 'back' links
-// - remove item links
-// - add graph title
-// - graph direction
+//
+// General options:
+// * -file <input file>
+// * -out <output file or directory> (default stdout)
+// * -format MD | MARKDOWN | MM | MERMAID | HTML (mermaid options required for all)
+// * 
+//
+// MD/MARKDOWN options:
+// * -mm-tag ':'/'`' (for mermaid blocks)
+// * -title <title> (default from root item or "Architecture Diagram")
+//
+// MM/MERMAID options:
+// * -dir TD/LR
+// * -whole (single diagram with all items)
+// * -no-back (no back links)
+// * -no-link (don't show item links)
+// * -no-doc (no doc links)
 
 var mermaidWriter = new MermaidWriter();
 
 // Setup
-string inFile = null!, outFile = null!;
-var consoleOptions = new ConsoleOptions(
-    new PositionalArg(0, "file", v => inFile = v, true, "Input file (JSON or YAML)."),
-    new PositionalArg(1, "out", v => outFile = v, true, "Output file."),
-    new NamedArg("dir", v => mermaidWriter.GraphDirection = v, false, "Graph direction (TD, LR). Default: LR")
-);
-if (!consoleOptions.TryParse(args))
-{
-    return;
-}
+var options = new ConsoleArgs(args).Parse().ToArray();
 
+mermaidWriter.GraphDirection = options.SingleOrDefault(o => o.Name == "dir")?.Value ?? "LR";
 if (mermaidWriter.GraphDirection is not "TD" and not "LR")
 {
     Console.Error.WriteLine($"Invalid direction: {mermaidWriter.GraphDirection}. Must be TD or LR.");
@@ -36,6 +36,7 @@ if (mermaidWriter.GraphDirection is not "TD" and not "LR")
 }
 
 // Read input
+var inFile = options.SingleOrDefault(o => o.Position == 0 || o.Name == "file")?.Value;
 if (!File.Exists(inFile))
 {
     Console.Error.WriteLine($"File not found: {inFile}");
@@ -96,6 +97,8 @@ var markdownWriter = new MarkdownWriter();
 
 // Output
 var result = markdownWriter.Write(diagrams, mermaidWriter);
+
+var outFile = options.SingleOrDefault(o => o.Position == 1 || o.Name == "out")?.Value;
 if (outFile is null)
 {
     Console.WriteLine(result);
