@@ -4,12 +4,16 @@ using System.Text;
 
 namespace IFY.Archimedes.Logic;
 
-public static class MermaidWriter
+public class MermaidWriter
 {
-    public static string WriteMermaid(Diagram diagram, Dictionary<string, ArchComponent> all)
+    public string GraphDirection { get; set; } = "LR";
+
+    public Dictionary<string, ArchComponent> AllComponents { get; set; } = [];
+
+    public string WriteMermaid(Diagram diagram)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("graph " + Options.Direction);
+        sb.AppendLine("graph " + GraphDirection);
         sb.AppendLine($"%% {diagram.Title}");
 
         if (diagram.ParentId != null)
@@ -37,7 +41,7 @@ public static class MermaidWriter
             {
                 if (nodes.ContainsKey(info.SourceId) && !nodes.ContainsKey(info.TargetId))
                 {
-                    var target = all[info.TargetId];
+                    var target = AllComponents[info.TargetId];
                     if (target.Parent != null)
                     {
                         lines.Add($"<small><em>To <a href='#d-{target.Parent.Id.ToLower()}'>{target.Title.HtmlEncode()}</a></em></small>");
@@ -45,7 +49,7 @@ public static class MermaidWriter
                 }
                 else if (!nodes.ContainsKey(info.SourceId) && nodes.ContainsKey(info.TargetId))
                 {
-                    var source = all[info.SourceId];
+                    var source = AllComponents[info.SourceId];
                     if (source.Parent != null)
                     {
                         lines.Add($"<small><em>From <a href='#d-{source.Parent.Id.ToLower()}'>{source.Title.HtmlEncode()}</a></em></small>");
