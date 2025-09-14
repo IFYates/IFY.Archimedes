@@ -38,6 +38,11 @@ internal static class Utility
         }
     }
 
+    public static T? DeserializeJson<T>(this string json)
+        => JsonSerializer.Deserialize<T>(json, GlobalJsonOptions);
+    public static T? Deserialize<T>(this JsonElement element)
+        => JsonSerializer.Deserialize<T>(element, GlobalJsonOptions);
+
     public static string GetEnumMemberValue<T>(this T enumValue)
         where T : Enum
     {

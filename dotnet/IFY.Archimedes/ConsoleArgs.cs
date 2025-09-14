@@ -45,9 +45,11 @@ public class ConsoleArgs(string[] args)
                     // TODO: multi-value?
                     yield return new(null, name, args[++i]);
                 }
-
-                // Flag
-                yield return new(null, name, null);
+                else
+                {
+                    // Flag
+                    yield return new(null, name, null);
+                }
             }
             else
             {

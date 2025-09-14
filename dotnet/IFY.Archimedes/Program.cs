@@ -37,43 +37,11 @@ if (mermaidWriter.GraphDirection is not "TD" and not "LR")
 
 // Read input
 var inFile = options.SingleOrDefault(o => o.Position == 0 || o.Name == "file")?.Value;
-if (!File.Exists(inFile))
-{
-    Console.Error.WriteLine($"File not found: {inFile}");
-    return;
-}
-var input = File.ReadAllText(inFile);
-
-// Parse input
-Dictionary<string, JsonEntry> source;
-switch (new FileInfo(inFile).Extension.ToLower())
-{
-    case ".json":
-    case ".jsonc":
-        break;
-    case ".yaml":
-    case ".yml":
-        var deserializer = new DeserializerBuilder().Build();
-        var yaml = deserializer.Deserialize(new StringReader(input))
-            ?? throw new InvalidDataException($"Failed to parse YAML: {inFile}");
-        input = JsonSerializer.Serialize(yaml);
-        break;
-    default:
-        throw new InvalidDataException($"Unsupported file type: {inFile}");
-}
-try
-{
-    source = JsonSerializer.Deserialize<Dictionary<string, JsonEntry>>(input, Utility.GlobalJsonOptions)
-        ?? throw new InvalidDataException($"Failed to parse file: {inFile}");
-}
-catch (JsonException jex)
-{
-    throw new InvalidDataException($"Failed to parse file: {jex.Message}", jex);
-}
+var validator = new SchemaValidator();
+validator.AddSchema(inFile);
 
 // Validate schema
-var validator = new SchemaValidator();
-if (!validator.TryValidate(source))
+if (!validator.Validate())
 {
     // TODO: output errors
     return;
