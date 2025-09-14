@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using IFY.Archimedes.Logic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace IFY.Archimedes.Models.Schema.Json;
@@ -35,28 +36,24 @@ public record JsonComponent(
     /// <param name="json">The <see cref="JsonElement"/> containing the JSON representation of the schema component to parse.</param>
     /// <param name="component">When this method returns <see langword="true"/>, contains the parsed <see cref="JsonComponent"/> instance;
     /// otherwise, <see langword="null"/>.</param>
-    /// <param name="errors">When this method returns <see langword="false"/>, contains an array of <see cref="SchemaError"/> objects
-    /// describing the parsing errors; otherwise, <see langword="null"/>.</param>
     /// <returns><see langword="true"/> if the JSON element was successfully parsed into a <see cref="JsonComponent"/>;
     /// otherwise, <see langword="false"/>.</returns>
-    public static bool TryParse(string key, JsonElement json, [NotNullWhen(true)] out JsonComponent? component, [NotNullWhen(false)] out SchemaError[]? errors)
+    public static bool TryParse(string key, JsonElement json, [NotNullWhen(true)] out JsonComponent? component)
     {
         try
         {
             component = json.Deserialize<JsonComponent>();
             if (component is null)
             {
-                errors = [new(SchemaError.ErrorLevel.Error, $"Failed to parse schema component '{key}'.")];
+                ErrorHandler.Error($"Failed to parse schema component '{key}'.");
                 return false;
             }
-
-            errors = null;
             return true;
         }
         catch (JsonException jex)
         {
             component = null;
-            errors = [new SchemaError(SchemaError.ErrorLevel.Error, $"Failed to parse schema component '{key}': {jex.Message}", jex)];
+            ErrorHandler.Error($"Failed to parse schema component '{key}': {jex.Message}", jex);
             return false;
         }
     }

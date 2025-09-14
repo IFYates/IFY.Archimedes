@@ -1,5 +1,4 @@
-﻿using IFY.Archimedes.Models;
-using IFY.Archimedes.Models.Schema;
+﻿using IFY.Archimedes.Models.Schema;
 using IFY.Archimedes.Models.Schema.Json;
 using System.Text.Json;
 using YamlDotNet.Serialization;
@@ -8,12 +7,6 @@ namespace IFY.Archimedes.Logic;
 
 public partial class SchemaValidator
 {
-    /// <summary>
-    /// Gets the collection of schema validation errors encountered during processing.
-    /// </summary>
-    public List<SchemaError> Errors { get; } = [];
-    public bool HasFailed => Errors.Any(e => e.Level == SchemaError.ErrorLevel.Error);
-
     public Dictionary<string, ArchComponent>? Result { get; private set; }
 
     private JsonConfig? _config;
@@ -24,7 +17,7 @@ public partial class SchemaValidator
         // Read input
         if (!File.Exists(path))
         {
-            Errors.Add(new SchemaError(SchemaError.ErrorLevel.Error, $"File not found: {path}"));
+            ErrorHandler.Error($"File not found: {path}");
             return false;
         }
         var input = File.ReadAllText(path);
@@ -53,36 +46,96 @@ public partial class SchemaValidator
             parsed = Utility.DeserializeJson<Dictionary<string, JsonElement>>(input);
             if (parsed is null)
             {
-                Errors.Add(new(SchemaError.ErrorLevel.Error, $"Failed to parse file: {path}"));
+                ErrorHandler.Error($"Failed to parse file: {path}");
                 return false;
             }
         }
         catch (JsonException jex)
         {
-            Errors.Add(new(SchemaError.ErrorLevel.Error, $"Failed to parse file: {jex.Message}", jex));
+            ErrorHandler.Error($"Failed to parse file: {jex.Message}", jex);
             return false;
         }
 
         // Merge source
-        foreach (var key in parsed.Keys)
+        var failed = false;
+        var include = new List<string>();
+        foreach (var item in parsed)
         {
-            if (_schema.ContainsKey(key)
+            switch (item.Key)
             {
-                Errors.Add(new(SchemaError.ErrorLevel.Error, $"Duplicate key in incoming files: {key}"));
-                return false;
-            }
+                case ".include":
+                    if (item.Value.ValueKind == JsonValueKind.String)
+                    {
+                        var val = item.Value.GetString();
+                        if (val != null)
+                        {
+                            include.Add(val);
+                        }
+                    }
+                    else if (item.Value.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var inc in item.Value.EnumerateArray())
+                        {
+                            if (inc.ValueKind == JsonValueKind.String)
+                            {
+                                var val = inc.GetString();
+                                if (val != null)
+                                {
+                                    include.Add(val);
+                                }
+                            }
+                            else
+                            {
+                                ErrorHandler.Error($"Invalid .include entry in {path}: must be a string or array of strings.");
+                                failed = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ErrorHandler.Error($"Invalid .include entry in {path}: must be a string or array of strings.");
+                        failed = true;
+                    }
+                    break;
 
-            if (!JsonComponent.TryParse(key, parsed[key], out var comp, out var errs))
-            {
-                Errors.AddRange(errs);
-            }
-            else
-            {
-                _schema[key] = comp;
+                case ".config":
+                    if (_config != null)
+                    {
+                        ErrorHandler.Error($"Duplicate key in incoming files: {item.Key}");
+                        return false;
+                    }
+                    if (!JsonConfig.TryParse(item.Value, out _config))
+                    {
+                        failed = true;
+                    }
+                    break;
+
+                default:
+                    if (_schema.ContainsKey(item.Key))
+                    {
+                        ErrorHandler.Error($"Duplicate key in incoming files: {item.Key}");
+                        return false;
+                    }
+                    if (!JsonComponent.TryParse(item.Key, item.Value, out var comp))
+                    {
+                        failed = true;
+                    }
+                    else
+                    {
+                        _schema[item.Key] = comp;
+                    }
+                    break;
             }
         }
 
-        return !HasFailed;
+        // Process includes
+        foreach (var inc in include)
+        {
+            var incPath = Path.IsPathRooted(inc) ? inc : Path.Combine(Path.GetDirectoryName(path) ?? string.Empty, inc);
+            failed |= AddSchema(incPath);
+        }
+
+        return !failed;
     }
 
     /// <summary>
@@ -92,7 +145,7 @@ public partial class SchemaValidator
     [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(Result))]
     public bool Validate()
     {
-        if (HasFailed)
+        if (_schema.Count == 0)
         {
             return false;
         }
@@ -128,7 +181,7 @@ public partial class SchemaValidator
                     var obj = link.Value.Deserialize<JsonLink>(Utility.GlobalJsonOptions);
                     if (obj is null)
                     {
-                        Errors.Add(new(SchemaError.ErrorLevel.Error, $"Unable to deserialise link object for component '{comp.Id}' and link '{link.Key}'."));
+                        ErrorHandler.Error($"Unable to deserialise link object for component '{comp.Id}' and link '{link.Key}'.");
                     }
                     else
                     {
@@ -142,12 +195,12 @@ public partial class SchemaValidator
                 }
                 else
                 {
-                    Errors.Add(new(SchemaError.ErrorLevel.Error, $"Unable to deserialise link object for component '{comp.Id}' and link '{link.Key}'."));
+                    ErrorHandler.Error($"Unable to deserialise link object for component '{comp.Id}' and link '{link.Key}'.");
                 }
 
                 if (!Enum.TryParse(typeValue ?? "default", true, out LinkType linkType))
                 {
-                    Errors.Add(new(SchemaError.ErrorLevel.Error, $"Component '{comp.Id}' has an invalid link type '{link.Value}' for target '{link.Key}'."));
+                    ErrorHandler.Error($"Component '{comp.Id}' has an invalid link type '{link.Value}' for target '{link.Key}'.");
                 }
                 comp.Links.Add(newLink with { Type = linkType });
             }
@@ -161,18 +214,18 @@ public partial class SchemaValidator
             // Validate key format: ^\w+$
             if (!ComponentIdFormat().IsMatch(key))
             {
-                Errors.Add(new(SchemaError.ErrorLevel.Error, $"Component key '{key}' is invalid. Keys must be non-empty and contain only letters, numbers, and underscores."));
+                ErrorHandler.Error($"Component key '{key}' is invalid. Keys must be non-empty and contain only letters, numbers, and underscores.");
             }
 
             if (all.ContainsKey(key))
             {
-                Errors.Add(new(SchemaError.ErrorLevel.Error, $"Component '{key}' is defined multiple times."));
+                ErrorHandler.Error($"Component '{key}' is defined multiple times.");
             }
 
             var nodeType = NodeType.Default;
             if (item.Type?.Length > 0 && !Enum.TryParse(item.Type, true, out nodeType))
             {
-                Errors.Add(new(SchemaError.ErrorLevel.Error, $"Component '{key}' has an invalid 'Type' property: {item.Type}"));
+                ErrorHandler.Error($"Component '{key}' has an invalid 'Type' property: {item.Type}");
             }
 
             var comp = new ArchComponent(item, parent, key, nodeType, item.Title?.Length > 0 ? item.Title : key);
