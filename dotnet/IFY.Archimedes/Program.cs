@@ -1,8 +1,5 @@
 ﻿using IFY.Archimedes;
 using IFY.Archimedes.Logic;
-using IFY.Archimedes.Models.Schema;
-using System.Text.Json;
-using YamlDotNet.Serialization;
 
 // TODO: options
 //
@@ -31,19 +28,30 @@ var options = new ConsoleArgs(args).Parse().ToArray();
 mermaidWriter.GraphDirection = options.SingleOrDefault(o => o.Name == "dir")?.Value ?? "LR";
 if (mermaidWriter.GraphDirection is not "TD" and not "LR")
 {
-    Console.Error.WriteLine($"Invalid direction: {mermaidWriter.GraphDirection}. Must be TD or LR.");
+    ErrorHandler.Error($"Invalid direction: {mermaidWriter.GraphDirection}. Must be TD or LR.");
     return;
 }
 
 // Read input
-var inFile = options.SingleOrDefault(o => o.Position == 0 || o.Name == "file")?.Value;
+var inFiles = options.Where(o => o.Name == "file" && o.Value?.Length > 0).Select(a => a.Value!).ToArray();
+if (inFiles.Length == 0)
+{
+    inFiles = [options.SingleOrDefault(o => o.Position == 0)?.Value!];
+}
+if (inFiles.Length == 0 || inFiles[0]?.Length > 0)
+{
+    ErrorHandler.Error("No input file specified.");
+    return;
+}
 var validator = new SchemaValidator();
-validator.AddSchema(inFile);
+foreach (var inFile in inFiles)
+{
+    validator.AddSchema(inFile);
+}
 
 // Validate schema
 if (!validator.Validate())
 {
-    // TODO: output errors
     return;
 }
 
