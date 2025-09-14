@@ -22,8 +22,8 @@ public class JsonConfig
 
     public string Direction { get; set; } = "TD";
     public string? Title { get; set; }
-    public Dictionary<string, JsonElement> NodeTypes { get; } = [];
-    public Dictionary<string, JsonElement> LinkTypes { get; } = [];
+    public Dictionary<string, JsonNodeStyle> NodeTypes { get; set; } = [];
+    public Dictionary<string, JsonElement> LinkTypes { get; set; } = [];
 
     /// <summary>
     /// Attempts to parse the specified JSON element into a <see cref="JsonConfig"> instance.
@@ -45,7 +45,28 @@ public class JsonConfig
                 return false;
             }
 
-            return true;
+            var failed = !config.NodeTypes.Select(t => t.Value.Validate(t.Key)).All(v => v);
+            foreach (var type in config.NodeTypes)
+            {
+                if (NodeType.Types.ContainsKey(type.Key.ToLower()))
+                {
+                    ErrorHandler.Error($"Duplicate node type: {type.Key}");
+                    return false;
+                }
+
+                var baseTypeName = type.Value.Base?.Length > 0 ? type.Value.Base : "default";
+                if (!NodeType.Types.TryGetValue(baseTypeName.ToLower(), out var baseType))
+                {
+                    baseType = NodeType.Default;
+                }
+
+                NodeType.Types[type.Key.ToLower()] = baseType with
+                {
+                    Style = type.Value
+                };
+            }
+
+            return !failed;
         }
         catch (JsonException jex)
         {

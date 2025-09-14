@@ -1,0 +1,39 @@
+.config:
+  direction: LR
+  nodeTypes:
+    external:
+      fill: "#888"
+      stroke-dasharray: 5
+File:
+  title: Input file
+  style: roof
+  detail: JSON or YAML
+  links:
+    Parser: {}
+Archimedes:
+  doc: https://github.com/IFYates/IFY.Archimedes
+  children:
+    Parser:
+      style: lean-r
+      links:
+        Structure: {}
+        ParserFail: dots
+    ParserFail:
+      title: Fail
+      style: circle2
+    Structure:
+      title: Hierarchy builder
+      links:
+        Writer: {}
+    Writer:
+      style: lean-l
+      links:
+        Output: dots
+Output:
+  detail: Mermaid diagrams
+  style: boat
+  links:
+    Next: dots
+Next:
+  title: Your processes
+  style: external

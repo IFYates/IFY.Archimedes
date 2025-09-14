@@ -8,11 +8,10 @@ namespace IFY.Archimedes.Models.Schema.Json;
 /// Represents an architecture component entry in the JSON data.
 /// </summary>
 public record JsonComponent(
-    string? Type,
+    string? Style,
     string? Title,
     string? Detail,
     string? Doc,
-    string? Style,
     bool Expand
 )
 {
