@@ -9,6 +9,17 @@ namespace IFY.Archimedes.Models.Schema.Json;
 /// </summary>
 public class JsonConfig
 {
+    /// <summary>
+    /// Gets the default configuration for JSON-based architecture diagrams.
+    /// </summary>
+    /// <remarks>Use this instance as a baseline when creating new configurations to ensure consistent default
+    /// settings for diagram direction and title.</remarks>
+    public static readonly JsonConfig Default = new()
+    {
+        Direction = "TD",
+        Title = "Architecture Diagram",
+    };
+
     public string Direction { get; set; } = "TD";
     public string? Title { get; set; }
     public Dictionary<string, JsonElement> NodeTypes { get; } = [];
@@ -26,6 +37,14 @@ public class JsonConfig
         try
         {
             config = json.Deserialize<JsonConfig>() ?? new();
+
+            // Validate
+            if (config.Direction is not "TD" and not "LR")
+            {
+                ErrorHandler.Error($"Invalid direction: {config.Direction}. Must be TD or LR.");
+                return false;
+            }
+
             return true;
         }
         catch (JsonException jex)

@@ -7,30 +7,18 @@ using IFY.Archimedes.Logic;
 // * -file <input file>
 // * -out <output file or directory> (default stdout)
 // * -format MD | MARKDOWN | MM | MERMAID | HTML (mermaid options required for all)
-// * 
 //
 // MD/MARKDOWN options:
 // * -mm-tag ':'/'`' (for mermaid blocks)
-// * -title <title> (default from root item or "Architecture Diagram")
 //
 // MM/MERMAID options:
-// * -dir TD/LR
 // * -whole (single diagram with all items)
 // * -no-back (no back links)
 // * -no-link (don't show item links)
 // * -no-doc (no doc links)
 
-var mermaidWriter = new MermaidWriter();
-
 // Setup
 var options = new ConsoleArgs(args).Parse().ToArray();
-
-mermaidWriter.GraphDirection = options.SingleOrDefault(o => o.Name == "dir")?.Value ?? "LR";
-if (mermaidWriter.GraphDirection is not "TD" and not "LR")
-{
-    ErrorHandler.Error($"Invalid direction: {mermaidWriter.GraphDirection}. Must be TD or LR.");
-    return;
-}
 
 // Read input
 var inFiles = options.Where(o => o.Name == "file" && o.Value?.Length > 0).Select(a => a.Value!).ToArray();
@@ -38,7 +26,7 @@ if (inFiles.Length == 0)
 {
     inFiles = [options.SingleOrDefault(o => o.Position == 0)?.Value!];
 }
-if (inFiles.Length == 0 || inFiles[0]?.Length > 0)
+if (inFiles.Length == 0 || inFiles[0] is null)
 {
     ErrorHandler.Error("No input file specified.");
     return;
@@ -59,7 +47,11 @@ if (!validator.Validate())
 var diagrams = DiagramBuilder.BuildDiagrams(validator.Result);
 
 // Output
-mermaidWriter.AllComponents = validator.Result;
+var mermaidWriter = new MermaidWriter
+{
+    GraphDirection = validator.Config.Direction,
+    AllComponents = validator.Result
+};
 var markdownWriter = new MarkdownWriter();
 
 //// Output multiple mermaid files
