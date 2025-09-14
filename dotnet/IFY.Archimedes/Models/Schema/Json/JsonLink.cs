@@ -1,4 +1,4 @@
-﻿namespace IFY.Archimedes.Models.Schema;
+﻿namespace IFY.Archimedes.Models.Schema.Json;
 
 /// <summary>
 /// A link in a JSON schema entry.
