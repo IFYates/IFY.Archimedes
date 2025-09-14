@@ -26,7 +26,7 @@ The structure of the file is as follows:
 ```yaml
 # Root is dictionary of components
 ComponentID:
-  type: # (optional) Display type of component
+  style: # (optional) Display style of component
     - node
     - block
     - data
@@ -56,7 +56,7 @@ ComponentID:
       - thick
       - invisible # Nothing visible
     TargetComponentID2: # Target of the link with full options
-      type: # (string, optional) Style of the link
+      style: # (string, optional) Style of the link
         - default
         - dots
         - line # No arrow
@@ -69,9 +69,15 @@ ComponentID:
 # Example
 Here is an example of a definition file in YAML format:
 ```yaml
+.config:
+  direction: LR
+  nodeTypes:
+    external:
+      fill: "#888"
+      stroke-dasharray: 5
 File:
   title: Input file
-  type: roof
+  style: roof
   detail: JSON or YAML
   links:
     Parser: {}
@@ -79,29 +85,29 @@ Archimedes:
   doc: https://github.com/IFYates/IFY.Archimedes
   children:
     Parser:
-      type: leanr
+      style: lean-r
       links:
         Structure: {}
         ParserFail: dots
     ParserFail:
       title: Fail
-      type: circle2
+      style: circle2
     Structure:
       title: Hierarchy builder
       links:
         Writer: {}
     Writer:
-      type: leanl
+      style: lean-l
       links:
         Output: dots
 Output:
   detail: Mermaid diagrams
-  type: boat
+  style: boat
   links:
     Next: dots
 Next:
   title: Your processes
-  style: fill:#888, stroke-dasharray:5 5
+  style: external
 ```
 
 Using command `IFY.Archimedes.exe -file example.yaml`, you would get the following Mermaid diagrams:
@@ -116,7 +122,7 @@ Using command `IFY.Archimedes.exe -file example.yaml`, you would get the followi
 >     Archimedes[["<a href='#d-archimedes' title='Expand node'>Archimedes</a><br><small><a href='https://github.com/IFYates/IFY.Archimedes' title='Go to documentation'>📖 Documentation</a></small><br><small>4 children</small>"]]
 >     Output[\"Output<br><em>Mermaid diagrams</em>"/]
 >     Next["Your processes"]
->     style Next fill:#888, stroke-dasharray:5 5
+>     style Next fill: #888, stroke-dasharray: 5
 > 
 >     File -->|"Via args<br><small><em>To <a href='#d-archimedes'>Parser</a></em></small>"| Archimedes
 >     Archimedes -.->|"<small><em>From <a href='#d-archimedes'>Writer</a></em></small>"| Output

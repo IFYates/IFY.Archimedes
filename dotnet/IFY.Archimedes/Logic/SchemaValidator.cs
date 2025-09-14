@@ -204,7 +204,7 @@ public partial class SchemaValidator
                 {
                     ErrorHandler.Error($"Component '{comp.Id}' has an invalid link type '{link.Value}' for target '{link.Key}'.");
                 }
-                comp.Links.Add(newLink with { Type = linkType });
+                comp.Links.Add(newLink with { Style = linkType });
             }
         }
 
@@ -224,11 +224,13 @@ public partial class SchemaValidator
                 ErrorHandler.Error($"Component '{key}' is defined multiple times.");
             }
 
-            var nodeType = NodeType.Default;
-            if (item.Type?.Length > 0 && !Enum.TryParse(item.Type, true, out nodeType))
+            // Validate type
+            NodeType? nodeType = null;
+            if (item.Style?.Length > 0 && !NodeType.Types.TryGetValue(item.Style.ToLower(), out nodeType))
             {
-                ErrorHandler.Error($"Component '{key}' has an invalid 'Type' property: {item.Type}");
+                ErrorHandler.Error($"Unknown node type '{item.Style}' for component '{key}'.");
             }
+            nodeType ??= NodeType.Default;
 
             var comp = new ArchComponent(item, parent, key, nodeType, item.Title?.Length > 0 ? item.Title : key);
             all[key] = comp;

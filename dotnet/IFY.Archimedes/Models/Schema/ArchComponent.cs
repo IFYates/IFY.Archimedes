@@ -10,13 +10,12 @@ public record ArchComponent(
     JsonComponent Source,
     ArchComponent? Parent,
     string Id,
-    NodeType Type,
+    NodeType? Type,
     string Title
 )
 {
     public string? Detail => Source.Detail;
     public string? Doc => Source.Doc;
-    public string? Style => Source.Style;
     public bool Expand => Source.Expand;
 
     /// <summary>

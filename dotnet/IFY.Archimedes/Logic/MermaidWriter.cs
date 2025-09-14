@@ -124,18 +124,16 @@ public class MermaidWriter
                     break;
             }
 
-            var nodeType = node.Type;
-            if (nodeType == NodeType.Default)
-            {
-                nodeType = node.Component.Children.Count > 0 ? NodeType.Block : NodeType.Node;
-            }
-            var shape = nodeType.GetEnumMemberValue();
-            sb.AppendLine($"{indent}{node.Id}{string.Format(shape, nodeLabel)}");
-        }
+            var nodeFormat = node.Type?.Format;
+            nodeFormat ??= node.Component.Children.Count > 0
+                    ? NodeType.Block.Format : NodeType.Node.Format;
+            sb.AppendLine($"{indent}{node.Id}{string.Format(nodeFormat, nodeLabel)}");
 
-        if (node.Component.Style != null)
-        {
-            sb.AppendLine($"{indent}style {node.Id} {node.Component.Style}");
+            var style = node.Type?.Style?.ToString();
+            if (style?.Length > 0)
+            {
+                sb.AppendLine($"{indent}style {node.Id} {style}");
+            }
         }
     }
 }
