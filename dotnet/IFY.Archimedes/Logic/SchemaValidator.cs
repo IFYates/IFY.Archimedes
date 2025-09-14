@@ -8,8 +8,10 @@ namespace IFY.Archimedes.Logic;
 public partial class SchemaValidator
 {
     public Dictionary<string, ArchComponent>? Result { get; private set; }
-
+    
+    public JsonConfig Config => _config ?? JsonConfig.Default;
     private JsonConfig? _config;
+
     private readonly Dictionary<string, JsonComponent> _schema = [];
 
     public bool AddSchema(string path)
