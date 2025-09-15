@@ -22,7 +22,7 @@ public partial class SchemaValidator
 
     private readonly Dictionary<string, JsonComponent> _schema = [];
 
-    public bool AddSchema(string path)
+    public bool AddFile(string path)
     {
         // Read input
         if (!File.Exists(path))
@@ -33,22 +33,23 @@ public partial class SchemaValidator
         var input = File.ReadAllText(path);
 
         // Ensure input is JSON
-        switch (new FileInfo(path).Extension.ToLower())
+        return new FileInfo(path).Extension.ToLower() switch
         {
-            case ".json":
-            case ".jsonc":
-                break;
-            case ".yaml":
-            case ".yml":
-                var deserializer = new DeserializerBuilder().Build();
-                var yaml = deserializer.Deserialize(new StringReader(input))
-                    ?? throw new InvalidDataException($"Failed to parse YAML: {path}");
-                input = JsonSerializer.Serialize(yaml);
-                break;
-            default:
-                throw new InvalidDataException($"Unsupported file type: {path}");
-        }
-
+            ".json" or ".jsonc" => AddJson(input, path),
+            ".yaml" or ".yml" => AddYaml(input, path),
+            _ => throw new InvalidDataException($"Unsupported file type: {path}"),
+        };
+    }
+    public bool AddYaml(string input, string path = "YAML")
+    {
+        var deserializer = new DeserializerBuilder().Build();
+        var yaml = deserializer.Deserialize(new StringReader(input))
+            ?? throw new InvalidDataException($"Failed to parse YAML: {path}");
+        var json = JsonSerializer.Serialize(yaml);
+        return AddJson(json, path);
+    }
+    public bool AddJson(string input, string path = "JSON")
+    {
         // Parse input
         Dictionary<string, JsonElement>? parsed;
         try
@@ -148,7 +149,7 @@ public partial class SchemaValidator
         foreach (var inc in include)
         {
             var incPath = Path.IsPathRooted(inc) ? inc : Path.Combine(Path.GetDirectoryName(path) ?? string.Empty, inc);
-            failed |= AddSchema(incPath);
+            failed |= AddFile(incPath);
         }
 
         return !failed;

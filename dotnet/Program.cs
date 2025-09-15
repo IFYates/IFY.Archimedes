@@ -34,7 +34,7 @@ if (inFiles.Length == 0 || inFiles[0] is null)
 var validator = new SchemaValidator();
 foreach (var inFile in inFiles)
 {
-    validator.AddSchema(inFile);
+    validator.AddFile(inFile);
 }
 
 // Validate schema
@@ -47,11 +47,7 @@ if (!validator.Validate())
 var diagrams = DiagramBuilder.BuildDiagrams(validator.Result);
 
 // Output
-var mermaidWriter = new MermaidWriter
-{
-    GraphDirection = validator.Config.Direction,
-    AllComponents = validator.Result
-};
+var mermaidWriter = new MermaidWriter(validator.Result, validator.Config);
 var markdownWriter = new MarkdownWriter(validator.Config);
 
 //// Output multiple mermaid files
