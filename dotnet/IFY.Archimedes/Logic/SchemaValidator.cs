@@ -7,6 +7,14 @@ namespace IFY.Archimedes.Logic;
 
 public partial class SchemaValidator
 {
+    public static readonly string[] ReservedComponentNames =
+    [
+        "end",
+        "linkStyle",
+        "style",
+        "subgraph"
+    ];
+
     public Dictionary<string, ArchComponent>? Result { get; private set; }
     
     public JsonConfig Config => _config ?? JsonConfig.Default;
@@ -113,6 +121,12 @@ public partial class SchemaValidator
                     break;
 
                 default:
+                    if (ReservedComponentNames.Contains(item.Key))
+                    {
+                        ErrorHandler.Error($"'{item.Key}' is a reserved word and cannot be used as a component name.");
+                        failed = true;
+                        break;
+                    }
                     if (_schema.ContainsKey(item.Key))
                     {
                         ErrorHandler.Error($"Duplicate key in incoming files: {item.Key}");
@@ -237,6 +251,17 @@ public partial class SchemaValidator
 
             foreach (var childKey in item.Children.Keys)
             {
+                if (ReservedComponentNames.Contains(childKey))
+                {
+                    ErrorHandler.Error($"'{childKey}' is a reserved word and cannot be used as a component name.");
+                    continue;
+                }
+                if (all.ContainsKey(childKey))
+                {
+                    ErrorHandler.Error($"Component '{childKey}' is defined multiple times.");
+                    continue;
+                }
+
                 comp.Children[childKey] = parseComponents(childKey, item.Children[childKey], comp);
             }
 

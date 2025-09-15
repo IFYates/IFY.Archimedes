@@ -14,7 +14,7 @@ public record ArchComponent(
     string Title
 )
 {
-    public string? Detail => Source.Detail;
+    public string? Detail => Source.Detail?.Replace("\\n", "\n");
     public string? Doc => Source.Doc;
     public bool Expand => Source.Expand;
 

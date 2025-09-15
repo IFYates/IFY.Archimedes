@@ -12,9 +12,13 @@ public record Diagram
     /// </summary>
     public int Depth { get; set; }
     /// <summary>
+    /// Gets the parent diagram of this diagram, if one exists.
+    /// </summary>
+    public Diagram? Parent { get; }
+    /// <summary>
     /// The ID of the parent diagram, if any.
     /// </summary>
-    public string? ParentId { get; }
+    public string? ParentId => Parent?.Id;
     /// <summary>
     /// The root component for the diagram, if any.
     /// </summary>
@@ -38,13 +42,13 @@ public record Diagram
     /// </summary>
     public Dictionary<string, NodeLink> Links { get; } = [];
 
-    public Diagram(ArchComponent? root, int depth)
+    public Diagram(ArchComponent? root, int depth, Diagram? parent)
     {
         Id = root is null ? "root-d" : $"d-{root.Id.ToLower()}";
         Title = root?.Title ?? "All Components";
         RootComponent = root;
         Depth = depth;
-        ParentId = root is null ? null : root.Parent?.Id is null ? "root-d" : $"d-{root?.Parent?.Id.ToLower()}";
+        Parent = parent;
     }
 
     public Dictionary<string, DiagramNode> GetAllNodes()

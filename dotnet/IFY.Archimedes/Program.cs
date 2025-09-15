@@ -52,7 +52,7 @@ var mermaidWriter = new MermaidWriter
     GraphDirection = validator.Config.Direction,
     AllComponents = validator.Result
 };
-var markdownWriter = new MarkdownWriter();
+var markdownWriter = new MarkdownWriter(validator.Config);
 
 //// Output multiple mermaid files
 //// TEMP

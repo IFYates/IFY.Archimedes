@@ -17,7 +17,7 @@ public class JsonConfig
     public static readonly JsonConfig Default = new()
     {
         Direction = "TD",
-        Title = "Architecture Diagram",
+        Title = "Architecture Diagrams",
     };
 
     public string Direction { get; set; } = "TD";

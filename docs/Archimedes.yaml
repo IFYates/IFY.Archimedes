@@ -1,0 +1,95 @@
+.config:
+  title: Archimedes schema file
+  direction: LR
+  nodeTypes:
+    optional:
+      stroke-dashArray: 7
+ArchFile:
+  title: Schema file
+  detail: YAML or JSON(C)
+  expand: true
+  children:
+    Includes:
+      title: .include
+      style: optional
+      detail: string or string array
+    Config:
+      title: .config
+      style: optional
+      children:
+        config_title:
+          title: title
+          style: optional
+          detail: string
+        direction:
+          style: optional
+          detail: LR (default) or TD
+        nodeTypes:
+          style: optional
+          detail: Dictionary
+          children:
+            base:
+              style: optional
+              detail: Base style name
+            fill:
+              style: optional
+              detail: CSS colour
+            color:
+              style: optional
+              detail: CSS colour
+            stroke:
+              style: optional
+              detail: HTML colour
+            strokeDashArray:
+              title: stroke-dashArray
+              style: optional
+              detail: CSS border dash array
+            strokeWidth:
+              title: stroke-width
+              style: optional
+              detail: CSS width
+    _Components:
+      title: "{component ID}"
+      detail: Dictionary entry
+      children:
+        node_title:
+          title: title
+          style: optional
+          detail: string (defaults to ID)
+        node_style:
+          title: style
+          style: optional
+          detail: Any style name (defaults to 'node' or 'block')
+          links:
+            nodeTypes: dots
+        detail:
+          style: optional
+          detail: string
+        doc:
+          style: optional
+          detail: URL
+        expand:
+          style: optional
+          detail: boolean
+        children:
+          style: optional
+          detail: Dictionary of components
+        links:
+          style: optional
+          detail: Dictionary
+          children:
+            _Links:
+              title: "{target component ID}"
+              style: optional
+              detail: Dictionary entry \n string (link style) or object
+              children:
+                link_style:
+                  title: style
+                  style: optional
+                  detail: Any style name (defaults to 'default')
+                text:
+                  style: optional
+                  detail: string
+                reverse:
+                  style: optional
+                  detail: boolean

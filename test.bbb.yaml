@@ -1,0 +1,9 @@
+Bbb:
+  children:
+    Ccc:
+      children:
+        Ddd:
+          text: Ddd
+          links:
+            Eee: {}
+    Eee: {}
