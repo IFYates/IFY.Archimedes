@@ -1,6 +1,5 @@
 ﻿using IFY.Archimedes.Models;
 using IFY.Archimedes.Models.Schema;
-using System.Formats.Tar;
 
 namespace IFY.Archimedes.Logic;
 
@@ -12,16 +11,17 @@ public static class DiagramBuilder // TODO: options?
     public static Dictionary<string, Diagram> BuildDiagrams(Dictionary<string, ArchComponent> components)
     {
         var diagrams = new Dictionary<string, Diagram>();
-        buildDiagram(diagrams, null, 0, components);
+        buildDiagram(diagrams, null, null, components);
         return diagrams;
     }
 
     // Root items are shown in detail with all links in and out
     // TODO: All root item parents should be shown
-    private static void buildDiagram(Dictionary<string, Diagram> diagrams, ArchComponent? root, int depth, Dictionary<string, ArchComponent> components)
+    private static void buildDiagram(Dictionary<string, Diagram> diagrams, ArchComponent? root, Diagram? parent, Dictionary<string, ArchComponent> components)
     {
         // Create diagram for the current root (if not already created)
-        var diagram = new Diagram(root, depth);
+        var depth = (parent?.Depth ?? -1) + 1;
+        var diagram = new Diagram(root, depth, parent);
         if (diagrams.TryGetValue(diagram.Id, out var value))
         {
             if (value.Depth > depth)
@@ -39,14 +39,14 @@ public static class DiagramBuilder // TODO: options?
         {
             var node = addNode(null, root, true);
 
-            // Add parent nodes
+            // Add parent node hierarchy
             while (node.Component.Parent != null)
             {
-                var parent = addNode(null, node.Component.Parent, false);
-                parent.ChildNodes[node.Id] = node;
+                var parentNode = addNode(null, node.Component.Parent, false);
+                parentNode.ChildNodes[node.Id] = node;
                 diagram.Nodes.Remove(node.Id);
-                diagram.Nodes[parent.Id] = parent;
-                node = parent;
+                diagram.Nodes[parentNode.Id] = parentNode;
+                node = parentNode;
             }
         }
         else
@@ -54,7 +54,7 @@ public static class DiagramBuilder // TODO: options?
             // Add all top-level items
             foreach (var item in components.Values.Where(c => c.Parent is null))
             {
-                addNode(null, item, false);
+                addNode(null, item, item.Expand);
             }
         }
 
@@ -71,11 +71,11 @@ public static class DiagramBuilder // TODO: options?
                 {
                     if (!nodes.ContainsKey(source.Id))
                     {
-                        addNode(sourceParent, source, false);
+                        addNode(sourceParent, source, source.Expand);
                     }
                     if (!nodes.ContainsKey(target.Id))
                     {
-                        addNode(targetParent, target, false);
+                        addNode(targetParent, target, target.Expand);
                     }
                 }
             }
@@ -116,7 +116,7 @@ public static class DiagramBuilder // TODO: options?
         // Recursively build child diagrams
         foreach (var item in nodes.Values.Select(n => n.Component).Where(n => n.Children.Count > 0 && !n.Expand))
         {
-            buildDiagram(diagrams, item, depth + 1, components);
+            buildDiagram(diagrams, item, diagram, components);
         }
 
         DiagramNode addNode(DiagramNode? parent, ArchComponent component, bool expand)
@@ -136,11 +136,11 @@ public static class DiagramBuilder // TODO: options?
             mapLinks(component);
 
             // Expand children
-            if (expand || component.Expand)
+            if (expand)
             {
                 foreach (var child in component.Children.Values)
                 {
-                    addNode(node, child, false);
+                    addNode(node, child, child.Expand);
                 }
             }
 

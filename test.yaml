@@ -1,0 +1,13 @@
+.config:
+  direction: LR
+  nodeTypes:
+    dashed:
+      base: circle2
+      fill: red
+      stroke-dasharray: 7
+Aaa:
+  style: dashed
+  links:
+    Ddd: {}
+.include:
+- test.bbb.yaml
