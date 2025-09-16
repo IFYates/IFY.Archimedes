@@ -2,10 +2,21 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<Authors>IFYates</Authors>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Version>0.1.0</Version>
+		<PackageProjectUrl>https://github.com/IFYates/IFY.Archimedes</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/IFYates/IFY.Archimedes</RepositoryUrl>
+		<PackAsTool>true</PackAsTool>
+		<RepositoryType>GitHub</RepositoryType>
+		<ToolCommandName>archimedes</ToolCommandName>
 	</PropertyGroup>
 
 	<ItemGroup>
