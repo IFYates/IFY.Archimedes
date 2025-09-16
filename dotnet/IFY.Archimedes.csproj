@@ -14,10 +14,19 @@
 		<Version>0.1.0</Version>
 		<PackageProjectUrl>https://github.com/IFYates/IFY.Archimedes</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/IFYates/IFY.Archimedes</RepositoryUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Description>Archimedes is a tool designed to help developers create layered architectural diagrams for their software projects. It allows you to define layers and components in a structured way, making it easier to visualise and communicate the architecture of your applications.</Description>
 		<PackAsTool>true</PackAsTool>
 		<RepositoryType>GitHub</RepositoryType>
 		<ToolCommandName>archimedes</ToolCommandName>
 	</PropertyGroup>
+	
+    <ItemGroup>
+      <None Include="..\README.md">
+        <Pack>true</Pack>
+        <PackagePath>\</PackagePath>
+      </None>
+    </ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="YamlDotNet" Version="16.3.0" />
