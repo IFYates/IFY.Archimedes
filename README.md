@@ -5,21 +5,30 @@
 </div>
 
 # Archimedes
-A generator for layered architectural diagrams.
-
-# Overview
-Archimedes is a tool designed to help developers create layered architectural diagrams for their software projects. It allows you to define layers and components in a structured way, making it easier to visualise and communicate the architecture of your applications.
+Archimedes is a powerful tool to help visualise and communicate the architecture of your applications, by defining components in a simple configuration file and having the layers automatically expanded.
 
 # Features
 - Define layers and components using a simple configuration file.
 - Generate [Mermaid diagrams](https://mermaid.js.org) from the defined architecture.
-- Visualize the relationships between different components and layers, drilling down into sub-components as needed.
+- Visualise the relationships between different components and layers, drilling down into sub-components as needed.
 
-# Command-line
+# How to use
+```sh
+# Install
+dotnet tool install IFY.Archimedes
+
+# Run
+dotnet archimedes <options>
+```
+
+## Options
 The dotnet command line tool accepts the following arguments:
-> `IFY.Archimedes.exe [ <path> | -file <path> ] [ -dir TD|LR ]`
+> `[ <path> ] [ -file <path> ]* [ -out <path> ]`
 
-# Definition file
+You can specify multiple, valid input files to be treated as a single schema by repeating the `-file` parameter.  
+If `-out` is omitted, the result will be sent to `stdout`.
+
+# Schema file
 The architecture is defined as either JSON (comments allowed) or YAML.
 
 The structure of the file is as follows:
@@ -65,6 +74,8 @@ ComponentID:
       text: (string, optional) Text for the link
       reverse: (boolean, default: false) Whether the link is reversed (target to source)
 ```
+
+You can see this represented as [an architecture schema](docs/Archimedes.md).
 
 # Example
 Here is an example of a definition file in YAML format:

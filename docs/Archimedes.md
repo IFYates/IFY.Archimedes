@@ -1,4 +1,5 @@
 # Archimedes schema file
+[View source schema](Archimedes.yaml)
 
 <span id="root-d"></span>
 ## All Components

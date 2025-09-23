@@ -1,5 +1,6 @@
 .config:
   title: Archimedes schema file
+  description: "[View source schema](Archimedes.yaml)"
   direction: LR
   nodeTypes:
     optional:
