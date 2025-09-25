@@ -2,7 +2,7 @@
   "profiles": {
     "IFY.Archimedes": {
       "commandName": "Project",
-      "commandLineArgs": "-file \"../../../../../test.yaml\" -out \"../../../../../output.md\""
+      "commandLineArgs": "-file \"../../../../test.yaml\" -out \"../../../../output.md\""
     }
   }
 }

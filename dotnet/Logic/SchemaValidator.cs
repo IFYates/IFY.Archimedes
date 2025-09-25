@@ -35,7 +35,7 @@ public partial class SchemaValidator
         // Ensure input is JSON
         return new FileInfo(path).Extension.ToLower() switch
         {
-            ".json" or ".jsonc" => AddJson(input, path),
+            ".js" or ".json" or ".jsonc" => AddJson(input, path),
             ".yaml" or ".yml" => AddYaml(input, path),
             _ => throw new InvalidDataException($"Unsupported file type: {path}"),
         };
