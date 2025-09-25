@@ -7,6 +7,9 @@
 # Archimedes
 Archimedes is a powerful tool to help visualise and communicate the architecture of your applications, by defining components in a simple configuration file and having the layers automatically expanded.
 
+[![NuGet Version](https://img.shields.io/nuget/v/IFY.Archimedes?label=nuget%20tool)
+](https://www.nuget.org/packages/IFY.Archimedes/)
+
 # Features
 - Define layers and components using a simple configuration file.
 - Generate [Mermaid diagrams](https://mermaid.js.org) from the defined architecture.
