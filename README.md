@@ -1,6 +1,6 @@
 ﻿<div align="center">
 
-![Archimedes](archimedes-256.png)
+![Archie](archie-256.png)
 
 </div>
 
