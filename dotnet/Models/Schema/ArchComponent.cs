@@ -16,7 +16,7 @@ public record ArchComponent(
 {
     public string? Detail => Source.Detail?.Replace("\\n", "\n");
     public string? Doc => Source.Doc;
-    public bool Expand => Source.Expand;
+    public bool Expand => Source.Expand == true;
 
     /// <summary>
     /// Direct children of this component.

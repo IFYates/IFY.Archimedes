@@ -9,6 +9,6 @@ public record DiagramNode(ArchComponent Component)
 {
     public string Id => Component.Id;
     public string Title => Component.Title;
-    public NodeType Type => Component.Type;
+    public NodeType? Type => Component.Type;
     public Dictionary<string, DiagramNode> ChildNodes { get; } = [];
 }

@@ -1,6 +1,7 @@
 ﻿using IFY.Archimedes.Models;
 using IFY.Archimedes.Models.Schema;
 using IFY.Archimedes.Models.Schema.Json;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace IFY.Archimedes.Logic;
@@ -17,7 +18,9 @@ public class MermaidWriter(
 
         if (diagram.ParentId != null)
         {
-            sb.AppendLine($"    B{DateTime.Now.Ticks}([\"<small><a href='#{diagram.ParentId}'>Back</a></small>\"])");
+            var hash = Convert.ToHexStringLower(MD5.HashData(Encoding.UTF8.GetBytes(diagram.Id)));
+            sb.AppendLine($"    B{hash}([\"<small><a href='#{diagram.ParentId}'>Back</a></small>\"])");
+            sb.AppendLine($"    style B{hash} fill:#eee,stroke:#aaa,color:#555");
             sb.AppendLine();
         }
 

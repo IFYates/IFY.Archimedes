@@ -26,7 +26,7 @@ if (inFiles.Length == 0)
 {
     inFiles = [options.SingleOrDefault(o => o.Position == 0)?.Value!];
 }
-if (inFiles.Length == 0 || inFiles[0] is null)
+if (inFiles[0] is null)
 {
     ErrorHandler.Error("No input file specified.");
     return;

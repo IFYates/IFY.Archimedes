@@ -16,11 +16,10 @@ public class JsonConfig
     /// settings for diagram direction and title.</remarks>
     public static readonly JsonConfig Default = new()
     {
-        Direction = "TD",
         Title = "Architecture Diagrams",
     };
 
-    public string Direction { get; set; } = "TD";
+    public GraphDirection Direction { get; set; } = GraphDirection.TD;
     public string? Title { get; set; }
     public Dictionary<string, JsonNodeStyle> NodeTypes { get; set; } = [];
     public Dictionary<string, JsonElement> LinkTypes { get; set; } = [];
@@ -39,9 +38,9 @@ public class JsonConfig
             config = json.Deserialize<JsonConfig>() ?? new();
 
             // Validate
-            if (config.Direction is not "TD" and not "LR")
+            if (config.Direction is not GraphDirection.TD and not GraphDirection.LR and not GraphDirection.BT and not GraphDirection.RL)
             {
-                ErrorHandler.Error($"Invalid direction: {config.Direction}. Must be TD or LR.");
+                ErrorHandler.Error($"Invalid direction: {config.Direction}. Must be TD, LR, BT, or RL.");
                 return false;
             }
 
@@ -75,4 +74,13 @@ public class JsonConfig
             return false;
         }
     }
+}
+
+public enum GraphDirection
+{
+    Unknown,
+    TD,
+    LR,
+    BT,
+    RL
 }

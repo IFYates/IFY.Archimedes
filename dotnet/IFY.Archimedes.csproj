@@ -11,7 +11,7 @@
 	<PropertyGroup>
 		<Authors>IFYates</Authors>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Version>0.1.0</Version>
+		<Version>0.2.0</Version>
 		<PackageProjectUrl>https://github.com/IFYates/IFY.Archimedes</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/IFYates/IFY.Archimedes</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -19,6 +19,11 @@
 		<PackAsTool>true</PackAsTool>
 		<RepositoryType>GitHub</RepositoryType>
 		<ToolCommandName>archimedes</ToolCommandName>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>false</SelfContained>
 	</PropertyGroup>
 	
     <ItemGroup>

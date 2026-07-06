@@ -128,19 +128,23 @@ public partial class SchemaValidator
                         failed = true;
                         break;
                     }
-                    if (_schema.ContainsKey(item.Key))
+
+                    JsonComponent? comp;
+                    if (_schema.TryGetValue(item.Key, out var exist))
                     {
-                        ErrorHandler.Error($"Duplicate key in incoming files: {item.Key}");
-                        return false;
+                        if (!exist.TryMerge(item.Key, item.Value, out comp))
+                        {
+                            ErrorHandler.Error($"Duplicate key in incoming files: {item.Key}");
+                            return false;
+                        }
                     }
-                    if (!JsonComponent.TryParse(item.Key, item.Value, out var comp))
+                    else if (!JsonComponent.TryParse(item.Key, item.Value, out comp))
                     {
                         failed = true;
+                        break;
                     }
-                    else
-                    {
-                        _schema[item.Key] = comp;
-                    }
+                     
+                    _schema[item.Key] = comp;
                     break;
             }
         }
@@ -149,7 +153,7 @@ public partial class SchemaValidator
         foreach (var inc in include)
         {
             var incPath = Path.IsPathRooted(inc) ? inc : Path.Combine(Path.GetDirectoryName(path) ?? string.Empty, inc);
-            failed |= AddFile(incPath);
+            failed |= !AddFile(incPath);
         }
 
         return !failed;
